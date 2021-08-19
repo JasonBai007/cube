@@ -113,6 +113,8 @@
             isTouch = true
             controls2.disconnect()
             controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 不让缩放，要不然容易跑到立方体外面
+            controls.enableZoom = false;
         }
 
         // 滑动结束后，重新监听设备方向

@@ -37,7 +37,6 @@
         animate();
 
         function initThree() {
-
             const container = document.getElementById('container');
             //场景
             scene = new THREE.Scene();
@@ -51,7 +50,8 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
             //轨道控制器，可以使得相机围绕目标进行轨道运动。
-            // controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 重点：为了实现切换到手动旋转模式，这里必须初始化一下，否则第一次切换不好使
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
             // 陀螺仪控制器（这个启动后，上面的就不管用了）
             controls2 = new THREE.DeviceOrientationControls(camera);
 
@@ -93,6 +93,7 @@
         // 这将创建一个循环，以每秒60次的频率来绘制场景。
         function animate() {
             requestAnimationFrame(animate);
+            // 必须需要这个变量，否则手动旋转的时候，画面抖动
             if (!isTouch) {
                 controls2.update();
             }
@@ -107,12 +108,14 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
+        // 监听滑动开始事件：解除设备方向监听，再次添加手动旋转功能
         function onTouchStart(e) {
             isTouch = true
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls2.disconnect()
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
         }
 
+        // 滑动结束后，重新监听设备方向
         function onTouchEnd(e) {
             isTouch = false;
             controls2.connect()

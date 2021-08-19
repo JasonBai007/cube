@@ -23,11 +23,14 @@
     <div id="container"></div>
     <!-- 引入three.js -->
     <script src="./libs/three.js"></script>
-    <!-- 轨道控制器模块需要单独引入 -->
+    <!-- 轨道控制器需要单独引入 -->
     <!-- https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/OrbitControls.js -->
     <script src="./libs/OrbitControls.js"></script>
+    <!-- 设备朝向控制器需要单独引入 -->
+    <!-- https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/DeviceOrientationControls.js -->
+    <script src="./libs/DeviceOrientationControls.js"></script>
     <script>
-        let scene, camera, renderer;
+        let scene, camera, renderer, controls, controls2;
 
         initThree();
         animate();
@@ -39,7 +42,7 @@
             scene = new THREE.Scene();
             //镜头：视角，宽高比，近裁剪面，远裁剪面
             // https://www.techbrood.com/threejs/docs/#使用指南/入门介绍/创建一个场景(Scene)
-            camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
             // 把镜头放置在中心点附近
             camera.position.set(0, 0, 0.01);
             //渲染器
@@ -47,7 +50,9 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
             //轨道控制器，可以使得相机围绕目标进行轨道运动。
-            let controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // 陀螺仪控制器（这个启动后，上面的就不管用了）
+            controls2 = new THREE.DeviceOrientationControls(camera);
 
             //添加3D物体
             let materials = [];
@@ -74,7 +79,7 @@
             // 贴图显示在box的内面
             box.geometry.scale(1, 1, -1);
             scene.add(box);
-            
+
             // 实现自适应
             window.addEventListener('resize', onWindowResize);
         }
@@ -83,17 +88,17 @@
         // 这将创建一个循环，以每秒60次的频率来绘制场景。
         function animate() {
             requestAnimationFrame(animate);
+            controls2.update();
             renderer.render(scene, camera);
         }
 
         function onWindowResize() {
+            // 更新相机的宽高比
             camera.aspect = window.innerWidth / window.innerHeight;
+            // 更新透视相机的投影矩阵
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-
         }
-
-
 
     </script>
 </body>

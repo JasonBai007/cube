@@ -31,6 +31,7 @@
     <script src="./libs/DeviceOrientationControls.js"></script>
     <script>
         let scene, camera, renderer, controls, controls2;
+        let isTouch = false;
 
         initThree();
         animate();
@@ -40,7 +41,7 @@
             const container = document.getElementById('container');
             //场景
             scene = new THREE.Scene();
-            //镜头：视角，宽高比，近裁剪面，远裁剪面
+            //透视镜头：视角，宽高比，近裁剪面，远裁剪面
             // https://www.techbrood.com/threejs/docs/#使用指南/入门介绍/创建一个场景(Scene)
             camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
             // 把镜头放置在中心点附近
@@ -50,11 +51,11 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
             //轨道控制器，可以使得相机围绕目标进行轨道运动。
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // controls = new THREE.OrbitControls(camera, renderer.domElement);
             // 陀螺仪控制器（这个启动后，上面的就不管用了）
             controls2 = new THREE.DeviceOrientationControls(camera);
 
-            //添加3D物体
+            //添加3D几何体
             let materials = [];
             //根据左右上下前后的顺序构建六个面的材质集：网孔基础材料（MeshBasicMaterial）
             let texture_left = new THREE.TextureLoader().load('./images/left.jpg');
@@ -82,13 +83,19 @@
 
             // 实现自适应
             window.addEventListener('resize', onWindowResize);
+
+            window.addEventListener('touchstart', onTouchStart);
+            window.addEventListener("touchend", onTouchEnd);
+
         }
 
         //帧同步重绘
         // 这将创建一个循环，以每秒60次的频率来绘制场景。
         function animate() {
             requestAnimationFrame(animate);
-            controls2.update();
+            if (!isTouch) {
+                controls2.update();
+            }
             renderer.render(scene, camera);
         }
 
@@ -98,6 +105,18 @@
             // 更新透视相机的投影矩阵
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onTouchStart(e) {
+            isTouch = true
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls2.disconnect()
+        }
+
+        function onTouchEnd(e) {
+            isTouch = false;
+            controls2.connect()
+            controls = null
         }
 
     </script>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Room</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #container {
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <!-- 引入three.js -->
+    <script src="./libs/three.js"></script>
+    <!-- 轨道控制器模块需要单独引入 -->
+    <script src="./libs/OrbitControls.js"></script>
+    <script>
+        let scene, camera, renderer;
+
+        initThree();
+
+        function initThree() {
+
+            const container = document.getElementById('container');
+            //场景
+            scene = new THREE.Scene();
+            //镜头：视角，宽高比，近裁剪面，远裁剪面
+            // https://www.techbrood.com/threejs/docs/#使用指南/入门介绍/创建一个场景(Scene)
+            camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
+            // 把镜头放置在中心点附近
+            camera.position.set(0, 0, 0.01);
+            //渲染器
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+            //轨道控制器，可以使得相机围绕目标进行轨道运动。
+            let controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+            //添加3D物体
+            let materials = [];
+            //根据左右上下前后的顺序构建六个面的材质集：网孔基础材料（MeshBasicMaterial）
+            let texture_left = new THREE.TextureLoader().load('./images/left.jpg');
+            materials.push(new THREE.MeshBasicMaterial({ map: texture_left }));
+
+            let texture_right = new THREE.TextureLoader().load('./images/right.jpg');
+            materials.push(new THREE.MeshBasicMaterial({ map: texture_right }));
+
+            let texture_top = new THREE.TextureLoader().load('./images/top.jpg');
+            materials.push(new THREE.MeshBasicMaterial({ map: texture_top }));
+
+            let texture_bottom = new THREE.TextureLoader().load('./images/bottom.jpg');
+            materials.push(new THREE.MeshBasicMaterial({ map: texture_bottom }));
+
+            let texture_front = new THREE.TextureLoader().load('./images/front.jpg');
+            materials.push(new THREE.MeshBasicMaterial({ map: texture_front }));
+
+            let texture_back = new THREE.TextureLoader().load('./images/back.jpg');
+            materials.push(new THREE.MeshBasicMaterial({ map: texture_back }));
+
+            let box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), materials);
+            // 贴图显示在box的内面
+            box.geometry.scale(1, 1, -1);
+            scene.add(box);
+
+            animate();
+        }
+
+        //帧同步重绘
+        // 这将创建一个循环，以每秒60次的频率来绘制场景。
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+
+
+    </script>
+</body>
+
+</html>

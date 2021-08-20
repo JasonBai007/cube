@@ -4,6 +4,7 @@ display personal bedroom by three.js
 ## Features
 1. 支持手动旋转控制
 2. 支持陀螺仪旋转控制
+3. 支持热点事件
 
 ## Links
 1. [三种前端实现VR全景看房的方案！说不定哪天就用得上！](https://juejin.cn/post/6973865268426571784)

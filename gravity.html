@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Room - Developed by Jason</title>
+    <title>My Room</title>
     <style>
         body {
             margin: 0;
@@ -31,59 +31,29 @@
     <script src="./libs/DeviceOrientationControls.js"></script>
     <script>
         let scene, camera, renderer, controls, controls2;
-        // let isTouch = false;
+        let isTouch = false;
         let hotSprites = []
 
         // 热点数据
         let hotPoints = [
             {
                 position: {
-                    x: -0.22,
-                    y: -0.48,
-                    z: -0.25
+                    x: 0,
+                    y: 0,
+                    z: -0.2
                 },
                 detail: {
-                    "title": "20"
+                    "title": "信息点1"
                 }
             },
             {
                 position: {
-                    x: 0.2,
-                    y: -0.48,
-                    z: -0.25
+                    x: -0.2,
+                    y: -0.05,
+                    z: 0.2
                 },
                 detail: {
-                    "title": "50"
-                }
-            },
-            {
-                position: {
-                    x: 0.27,
-                    y: -0.48,
-                    z: 0.3
-                },
-                detail: {
-                    "title": "100"
-                }
-            },
-            {
-                position: {
-                    x: -0.26,
-                    y: -0.48,
-                    z: 0.3
-                },
-                detail: {
-                    "title": "5"
-                }
-            },
-            {
-                position: {
-                    x: -0.03,
-                    y: -0.48,
-                    z: 0.16
-                },
-                detail: {
-                    "title": "20"
+                    "title": "信息点2"
                 }
             }
         ];
@@ -97,7 +67,7 @@
             scene = new THREE.Scene();
             //透视镜头：视角，宽高比，近裁剪面，远裁剪面
             // https://www.techbrood.com/threejs/docs/#使用指南/入门介绍/创建一个场景(Scene)
-            camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
             // 把镜头放置在中心点附近
             camera.position.set(0, 0, 0.01);
             //渲染器
@@ -108,7 +78,7 @@
             // 重点：为了实现切换到手动旋转模式，这里必须初始化一下，否则第一次切换不好使
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             // 陀螺仪控制器（这个启动后，上面的就不管用了）
-            // controls2 = new THREE.DeviceOrientationControls(camera);
+            controls2 = new THREE.DeviceOrientationControls(camera);
 
             //添加3D几何体
             let materials = [];
@@ -131,19 +101,18 @@
             let texture_back = new THREE.TextureLoader().load('./images/back.jpg');
             materials.push(new THREE.MeshBasicMaterial({ map: texture_back }));
 
-            // 创建立方体几何体：宽，高，纵深
             let box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), materials);
             // 贴图显示在box的内面
             box.geometry.scale(1, 1, -1);
             scene.add(box);
 
             // 添加半透明Sprite材质的热点
-            // 首先构建材质（全透明贴图）
-            let pointTexture = new THREE.TextureLoader().load('images/hot.png');
-            let material = new THREE.SpriteMaterial({ map: pointTexture });
+            // 首先构建材质
+            var pointTexture = new THREE.TextureLoader().load('images/hot.png');
+            var material = new THREE.SpriteMaterial({ map: pointTexture });
 
-            for (let i = 0; i < hotPoints.length; i++) {
-                let sprite = new THREE.Sprite(material);
+            for (var i = 0; i < hotPoints.length; i++) {
+                var sprite = new THREE.Sprite(material);
                 sprite.scale.set(0.1, 0.1, 0.1);
                 sprite.detail = hotPoints[i].detail;
                 sprite.position.set(hotPoints[i].position.x, hotPoints[i].position.y, hotPoints[i].position.z);
@@ -153,9 +122,9 @@
 
             // 实现自适应
             window.addEventListener('resize', onWindowResize);
-            // 必须绑定click事件
-            document.addEventListener('click', onTouchStart);
-            // window.addEventListener("touchend", onTouchEnd);
+
+            window.addEventListener('touchstart', onTouchStart);
+            window.addEventListener("touchend", onTouchEnd);
 
         }
 
@@ -164,9 +133,9 @@
         function animate() {
             requestAnimationFrame(animate);
             // 必须需要这个变量，否则手动旋转的时候，画面抖动
-            // if (!isTouch) {
-            //     controls2.update();
-            // }
+            if (!isTouch) {
+                controls2.update();
+            }
             renderer.render(scene, camera);
         }
 
@@ -180,32 +149,19 @@
 
         // 监听滑动开始事件：解除设备方向监听，再次添加手动旋转功能
         function onTouchStart(e) {
-            let raycaster = new THREE.Raycaster();
-            let mouse = new THREE.Vector2();
-
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            // 检测射线与哪些物体相交
-            let intersects = raycaster.intersectObjects(hotSprites);
-            // 如果与某个物体相交
-            if (intersects.length > 0) {
-                alert("恭喜你捡到 " + intersects[0].object.detail.title + ' 元红包！');
-            }
-            // isTouch = true
-            // controls2.disconnect()
-            // controls = new THREE.OrbitControls(camera, renderer.domElement);
+            isTouch = true
+            controls2.disconnect()
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
             // 不让缩放，要不然容易跑到立方体外面
-            // controls.enableZoom = false;
+            controls.enableZoom = false;
         }
 
         // 滑动结束后，重新监听设备方向
-        // function onTouchEnd(e) {
-        //     isTouch = false;
-        //     controls2.connect()
-        //     controls.dispose()
-        // }
+        function onTouchEnd(e) {
+            isTouch = false;
+            controls2.connect()
+            controls.dispose()
+        }
 
     </script>
 </body>

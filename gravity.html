@@ -107,15 +107,16 @@
 
             // 陀螺仪控制器（这个启动后，上面的就不管用了）
             controls2 = new THREE.DeviceOrientationControls(camera);
+            controls2.alphaOffset = -1.6
 
             //添加3D几何体
             let materials = [];
-            //根据左右上下前后的顺序构建六个面的材质集：网孔基础材料（MeshBasicMaterial）
-            let texture_left = new THREE.TextureLoader().load('./images/left.jpg');
-            materials.push(new THREE.MeshBasicMaterial({ map: texture_left }));
-
+            //根据右左上下前后的顺序构建六个面的材质集：网孔基础材料（MeshBasicMaterial）
             let texture_right = new THREE.TextureLoader().load('./images/right.jpg');
             materials.push(new THREE.MeshBasicMaterial({ map: texture_right }));
+
+            let texture_left = new THREE.TextureLoader().load('./images/left.jpg');
+            materials.push(new THREE.MeshBasicMaterial({ map: texture_left }));
 
             let texture_top = new THREE.TextureLoader().load('./images/top.jpg');
             materials.push(new THREE.MeshBasicMaterial({ map: texture_top }));

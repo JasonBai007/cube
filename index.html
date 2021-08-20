@@ -32,6 +32,7 @@
     <script>
         let scene, camera, renderer, controls, controls2;
         // let isTouch = false;
+        let isRotate = true;
         let hotSprites = []
 
         // 热点数据
@@ -107,6 +108,8 @@
             //轨道控制器，可以使得相机围绕目标进行轨道运动。
             // 重点：为了实现切换到手动旋转模式，这里必须初始化一下，否则第一次切换不好使
             controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableZoom = false
+            controls.autoRotate = isRotate
             // 陀螺仪控制器（这个启动后，上面的就不管用了）
             // controls2 = new THREE.DeviceOrientationControls(camera);
 
@@ -151,11 +154,12 @@
                 scene.add(sprite);
             }
 
-            // 实现自适应
+            // 实现宽高自适应
             window.addEventListener('resize', onWindowResize);
-            // 必须绑定click事件
-            document.addEventListener('click', onTouchStart);
-            // window.addEventListener("touchend", onTouchEnd);
+            // 绑定点击事件，发射射线
+            document.addEventListener('click', onClick);
+            // 绑定触摸事件
+            window.addEventListener("touchstart", onTouchStart);
 
         }
 
@@ -167,6 +171,10 @@
             // if (!isTouch) {
             //     controls2.update();
             // }
+            if (isRotate) {
+                controls.update()
+
+            }
             renderer.render(scene, camera);
         }
 
@@ -178,8 +186,14 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // 监听滑动开始事件：解除设备方向监听，再次添加手动旋转功能
+
+        // 触摸开始的时候，停止自动旋转
         function onTouchStart(e) {
+            isRotate = false;
+        }
+
+        // 点击时，从镜头发射射线到点击的位置，如果碰到精灵贴图，就会有提示
+        function onClick(e) {
             let raycaster = new THREE.Raycaster();
             let mouse = new THREE.Vector2();
 

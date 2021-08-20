@@ -28,11 +28,10 @@
     <script src="./libs/OrbitControls.js"></script>
     <!-- 设备朝向控制器需要单独引入 -->
     <!-- https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/DeviceOrientationControls.js -->
-    <script src="./libs/DeviceOrientationControls.js"></script>
+    <!-- <script src="./libs/DeviceOrientationControls.js"></script> -->
     <script>
         let scene, camera, renderer, controls, controls2;
         // let isTouch = false;
-        let isRotate = true;
         let hotSprites = []
 
         // 热点数据
@@ -98,7 +97,7 @@
             scene = new THREE.Scene();
             //透视镜头：视角，宽高比，近裁剪面，远裁剪面
             // https://www.techbrood.com/threejs/docs/#使用指南/入门介绍/创建一个场景(Scene)
-            camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
             // 把镜头放置在中心点附近
             camera.position.set(0, 0, 0.01);
             //渲染器
@@ -108,8 +107,9 @@
             //轨道控制器，可以使得相机围绕目标进行轨道运动。
             // 重点：为了实现切换到手动旋转模式，这里必须初始化一下，否则第一次切换不好使
             controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableZoom = false
-            controls.autoRotate = isRotate
+            controls.enableZoom = false // 禁止缩放
+            controls.autoRotate = true  // 自动旋转
+            controls.enableDamping = true  // 开启惯性
             // 陀螺仪控制器（这个启动后，上面的就不管用了）
             // controls2 = new THREE.DeviceOrientationControls(camera);
 
@@ -171,10 +171,7 @@
             // if (!isTouch) {
             //     controls2.update();
             // }
-            if (isRotate) {
-                controls.update()
-
-            }
+            controls.update()
             renderer.render(scene, camera);
         }
 
@@ -189,7 +186,7 @@
 
         // 触摸开始的时候，停止自动旋转
         function onTouchStart(e) {
-            isRotate = false;
+            controls.autoRotate = false
         }
 
         // 点击时，从镜头发射射线到点击的位置，如果碰到精灵贴图，就会有提示

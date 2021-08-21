@@ -33,6 +33,7 @@
         let scene, camera, renderer, controls, controls2;
         // let isTouch = false;
         let hotSprites = []
+        let ball; //二十面体
 
         // 热点数据
         let hotPoints = [
@@ -107,7 +108,7 @@
             //轨道控制器，可以使得相机围绕目标进行轨道运动。
             // 重点：为了实现切换到手动旋转模式，这里必须初始化一下，否则第一次切换不好使
             controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableZoom = false // 禁止缩放
+            // controls.enableZoom = false // 禁止缩放
             controls.autoRotate = true  // 自动旋转
             controls.enableDamping = true  // 开启惯性
             // 陀螺仪控制器（这个启动后，上面的就不管用了）
@@ -140,6 +141,14 @@
             box.geometry.scale(1, 1, -1);
             scene.add(box);
 
+
+            const meshMaterial = new THREE.MeshPhongMaterial({ color: 0x156289, emissive: 0x072534, side: 'DoubleSide', flatShading: true });
+            ball = new THREE.Mesh(new THREE.IcosahedronGeometry(0.05, 0), meshMaterial)
+            ball.position.set(0.18, 0.2, -0.2)
+            scene.add(ball)
+            scene.add(new THREE.PointLight(0xffffff, 2))
+
+
             // 添加半透明Sprite材质的热点
             // 首先构建材质（全透明贴图）
             let pointTexture = new THREE.TextureLoader().load('images/hot.png');
@@ -171,6 +180,8 @@
             // if (!isTouch) {
             //     controls2.update();
             // }
+            ball.rotation.x += 0.005;
+            ball.rotation.y += 0.005;
             controls.update()
             renderer.render(scene, camera);
         }

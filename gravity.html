@@ -33,6 +33,7 @@
         // 注意：无法完美的同时使用陀螺仪和轨道控制器
         let scene, camera, renderer, controls2;
         let hotSprites = []
+        let ball; //二十面体
 
         // 热点数据
         let hotPoints = [
@@ -136,6 +137,12 @@
             box.geometry.scale(1, 1, -1);
             scene.add(box);
 
+            const meshMaterial = new THREE.MeshPhongMaterial({ color: 0x156289, emissive: 0x072534, side: 'DoubleSide', flatShading: true });
+            ball = new THREE.Mesh(new THREE.IcosahedronGeometry(0.05, 0), meshMaterial)
+            ball.position.set(0.18, 0.2, -0.2)
+            scene.add(ball)
+            scene.add(new THREE.PointLight(0xffffff, 2))
+
             // 添加半透明Sprite材质的热点
             // 首先构建材质（全透明贴图）
             let pointTexture = new THREE.TextureLoader().load('images/hot.png');
@@ -162,6 +169,8 @@
         function animate() {
             requestAnimationFrame(animate);
             // 必须需要这个变量，否则手动旋转的时候，画面抖动
+            ball.rotation.x += 0.005;
+            ball.rotation.y += 0.005;
             controls2.update();
             renderer.render(scene, camera);
         }

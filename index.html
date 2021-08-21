@@ -34,6 +34,7 @@
         // let isTouch = false;
         let hotSprites = []
         let ball; //二十面体
+        let sound;
 
         // 热点数据
         let hotPoints = [
@@ -101,6 +102,23 @@
             camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
             // 把镜头放置在中心点附近
             camera.position.set(0, 0, 0.01);
+
+            // create an AudioListener and add it to the camera
+            const listener = new THREE.AudioListener();
+            camera.add(listener);
+
+            // create a global audio source
+            sound = new THREE.Audio(listener);
+
+            // load a sound and set it as the Audio object's buffer
+            const audioLoader = new THREE.AudioLoader();
+            audioLoader.load('./sounds/qixiangzhantai.m4a', function (buffer) {
+                sound.setBuffer(buffer);
+                sound.setLoop(false);
+                sound.setVolume(0.5);
+            });
+
+
             //渲染器
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -210,10 +228,18 @@
 
             raycaster.setFromCamera(mouse, camera);
             // 检测射线与哪些物体相交
-            let intersects = raycaster.intersectObjects(hotSprites);
+            let intersects = raycaster.intersectObjects([...hotSprites, ball]);
             // 如果与某个物体相交
             if (intersects.length > 0) {
-                alert("恭喜你捡到 " + intersects[0].object.detail.title + ' 元红包！');
+                if (intersects[0].object.detail) {
+                    alert("恭喜你捡到 " + intersects[0].object.detail.title + ' 元红包！');
+                } else {
+                    if (sound.isPlaying) {
+                        sound.pause()
+                    } else {
+                        sound.play()
+                    }
+                }
             }
             // isTouch = true
             // controls2.disconnect()

@@ -7,6 +7,7 @@ a 360° Cube developed with three.js
 3. 支持陀螺仪旋转控制（仅 gravity.html 版本支持）
 4. 支持热点点击事件
 5. 支持旋转惯性
+6. 支持音乐播放
 
 ## Links
 1. [三种前端实现VR全景看房的方案！说不定哪天就用得上！](https://juejin.cn/post/6973865268426571784)

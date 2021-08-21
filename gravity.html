@@ -23,6 +23,8 @@
     <div id="container"></div>
     <!-- 引入three.js -->
     <script src="./libs/three.js"></script>
+    <!-- 引入WebGL.js，测试浏览器是否支持WebGL -->
+    <script src="./libs/WebGL.js"></script>
     <!-- 轨道控制器需要单独引入 -->
     <!-- https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/OrbitControls.js -->
     <!-- <script src="./libs/OrbitControls.js"></script> -->
@@ -90,8 +92,12 @@
             }
         ];
 
-        initThree();
-        animate();
+        if (THREE.WEBGL.isWebGLAvailable()) {
+            initThree();
+            animate();
+        } else {
+            document.getElementById('container').innerHTML = '很遗憾，你的浏览器不支持WebGL'
+        }
 
         function initThree() {
             const container = document.getElementById('container');

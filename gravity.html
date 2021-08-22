@@ -125,7 +125,9 @@
             });
 
             //渲染器
-            renderer = new THREE.WebGLRenderer();
+            renderer = new THREE.WebGLRenderer({
+                antialias: true //抗锯齿
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 

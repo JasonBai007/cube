@@ -3,8 +3,8 @@ a 360° Cube developed with three.js
 
 ## Features
 1. 支持开屏自动旋转
-2. 支持手动旋转控制 （无法兼容IOS系统）
-3. 支持陀螺仪旋转控制（仅 gravity.html 版本支持）
+2. 支持手动旋转控制 (index.html)
+3. 支持陀螺仪旋转控制 (gravity.html，IOS系统暂不支持，需要IOS用户手动开启权限)
 4. 支持热点点击事件
 5. 支持旋转惯性
 6. 支持音乐播放

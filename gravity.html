@@ -12,10 +12,6 @@
             padding: 0;
             overflow: hidden;
         }
-
-        #container {
-            height: 100vh;
-        }
     </style>
 </head>
 
@@ -24,17 +20,14 @@
     <!-- 引入three.js -->
     <script src="./libs/three.js"></script>
     <!-- 引入WebGL.js，测试浏览器是否支持WebGL -->
-    <script src="./libs/WebGL.js"></script>
-    <!-- 轨道控制器需要单独引入 -->
-    <!-- https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/OrbitControls.js -->
-    <!-- <script src="./libs/OrbitControls.js"></script> -->
+    <script src="./libs/WebGL.js"></script>    
     <!-- 设备朝向控制器需要单独引入 -->
     <!-- https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/DeviceOrientationControls.js -->
     <script src="./libs/DeviceOrientationControls.js"></script>
     <script>
         // 注意：无法完美的同时使用陀螺仪和轨道控制器
         let scene, camera, renderer, controls2;
-        let hotSprites = []
+        let hotSprites = []; // 热点精灵数组
         let ball; //二十面体
         let sound;
 

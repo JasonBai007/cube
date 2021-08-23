@@ -12,10 +12,6 @@
             padding: 0;
             overflow: hidden;
         }
-
-        #container {
-            height: 100vh;
-        }
     </style>
 </head>
 
@@ -28,13 +24,10 @@
     <!-- 轨道控制器需要单独引入 -->
     <!-- https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/OrbitControls.js -->
     <script src="./libs/OrbitControls.js"></script>
-    <!-- 设备朝向控制器需要单独引入 -->
-    <!-- https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/DeviceOrientationControls.js -->
-    <!-- <script src="./libs/DeviceOrientationControls.js"></script> -->
     <script>
-        let scene, camera, renderer, controls, controls2;
-        // let isTouch = false;
-        let hotSprites = []
+        const container = document.getElementById('container');
+        let scene, camera, renderer, controls;
+        let hotSprites = []; // 热点精灵数组
         let ball; //二十面体
         let sound;
 
@@ -101,7 +94,6 @@
 
 
         function initThree() {
-            const container = document.getElementById('container');
             //场景
             scene = new THREE.Scene();
             //透视镜头：视角，宽高比，近裁剪面，远裁剪面
@@ -109,7 +101,27 @@
             camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
             // 把镜头放置在中心点附近
             camera.position.set(0, 0, 0.01);
+            //渲染器（抗锯齿）
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
 
+            addBox();
+            addBall();
+            addMusic();
+            addHots();
+            addControls();
+
+            // 实现宽高自适应
+            window.addEventListener('resize', onWindowResize);
+            // 绑定点击事件，发射射线
+            document.addEventListener('click', onClick);
+            // 绑定触摸事件
+            window.addEventListener("touchstart", onTouchStart);
+        }
+
+
+        function addMusic() {
             // create an AudioListener and add it to the camera
             const listener = new THREE.AudioListener();
             camera.add(listener);
@@ -124,23 +136,26 @@
                 sound.setLoop(false);
                 sound.setVolume(0.5);
             });
+        }
 
-
-            //渲染器
-            renderer = new THREE.WebGLRenderer({
-                antialias: true //抗锯齿
-            });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            container.appendChild(renderer.domElement);
+        function addControls() {
             //轨道控制器，可以使得相机围绕目标进行轨道运动。
             // 重点：为了实现切换到手动旋转模式，这里必须初始化一下，否则第一次切换不好使
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             // controls.enableZoom = false // 禁止缩放
             controls.autoRotate = true  // 自动旋转
             controls.enableDamping = true  // 开启惯性
-            // 陀螺仪控制器（这个启动后，上面的就不管用了）
-            // controls2 = new THREE.DeviceOrientationControls(camera);
+        }
 
+        function addBall() {
+            const meshMaterial = new THREE.MeshPhongMaterial({ color: 0x156289, emissive: 0x072534, side: 'DoubleSide', flatShading: true });
+            ball = new THREE.Mesh(new THREE.IcosahedronGeometry(0.05, 0), meshMaterial)
+            ball.position.set(0.18, 0.2, -0.2)
+            scene.add(ball)
+            scene.add(new THREE.PointLight(0xffffff, 2))
+        }
+
+        function addBox() {
             //添加3D几何体
             let materials = [];
             //根据右左上下前后的顺序构建六个面的材质集：网孔基础材料（MeshBasicMaterial）
@@ -167,20 +182,13 @@
             // 贴图显示在box的内面
             box.geometry.scale(1, 1, -1);
             scene.add(box);
+        }
 
-
-            const meshMaterial = new THREE.MeshPhongMaterial({ color: 0x156289, emissive: 0x072534, side: 'DoubleSide', flatShading: true });
-            ball = new THREE.Mesh(new THREE.IcosahedronGeometry(0.05, 0), meshMaterial)
-            ball.position.set(0.18, 0.2, -0.2)
-            scene.add(ball)
-            scene.add(new THREE.PointLight(0xffffff, 2))
-
-
+        function addHots() {
             // 添加半透明Sprite材质的热点
             // 首先构建材质（全透明贴图）
             let pointTexture = new THREE.TextureLoader().load('images/hot.png');
             let material = new THREE.SpriteMaterial({ map: pointTexture });
-
             for (let i = 0; i < hotPoints.length; i++) {
                 let sprite = new THREE.Sprite(material);
                 sprite.scale.set(0.1, 0.1, 0.1);
@@ -189,24 +197,12 @@
                 hotSprites.push(sprite)
                 scene.add(sprite);
             }
-
-            // 实现宽高自适应
-            window.addEventListener('resize', onWindowResize);
-            // 绑定点击事件，发射射线
-            document.addEventListener('click', onClick);
-            // 绑定触摸事件
-            window.addEventListener("touchstart", onTouchStart);
-
         }
 
         //帧同步重绘
         // 这将创建一个循环，以每秒60次的频率来绘制场景。
         function animate() {
             requestAnimationFrame(animate);
-            // 必须需要这个变量，否则手动旋转的时候，画面抖动
-            // if (!isTouch) {
-            //     controls2.update();
-            // }
             ball.rotation.x += 0.005;
             ball.rotation.y += 0.005;
             controls.update()
@@ -231,17 +227,15 @@
         function onClick(e) {
             let raycaster = new THREE.Raycaster();
             let mouse = new THREE.Vector2();
-
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
-
             raycaster.setFromCamera(mouse, camera);
             // 检测射线与哪些物体相交
             let intersects = raycaster.intersectObjects([...hotSprites, ball]);
             // 如果与某个物体相交
             if (intersects.length > 0) {
                 if (intersects[0].object.detail) {
-                    alert("恭喜你捡到 " + intersects[0].object.detail.title + ' 元红包！');
+                    alert("恭喜你捡到 " + intersects[0].object.detail.title + ' 元红包！50年后可找小白兑换');
                 } else {
                     if (sound.isPlaying) {
                         sound.pause()
@@ -250,19 +244,7 @@
                     }
                 }
             }
-            // isTouch = true
-            // controls2.disconnect()
-            // controls = new THREE.OrbitControls(camera, renderer.domElement);
-            // 不让缩放，要不然容易跑到立方体外面
-            // controls.enableZoom = false;
         }
-
-        // 滑动结束后，重新监听设备方向
-        // function onTouchEnd(e) {
-        //     isTouch = false;
-        //     controls2.connect()
-        //     controls.dispose()
-        // }
 
     </script>
 </body>

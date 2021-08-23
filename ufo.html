@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Moon</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <!-- 引入three.js -->
+    <script src="./libs/three.js"></script>
+    <!-- 引入WebGL.js，测试浏览器是否支持WebGL -->
+    <script src="./libs/WebGL.js"></script>
+    <!-- 轨道控制器需要单独引入 -->
+    <!-- https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/OrbitControls.js -->
+    <script src="./libs/OrbitControls.js"></script>
+    <script>
+        const container = document.getElementById('container');
+        let scene, camera, renderer, controls;
+        let hotSprites = []; // 热点精灵数组
+        let ball; //二十面体
+        let sound;
+
+        if (THREE.WEBGL.isWebGLAvailable()) {
+            initThree();
+            animate();
+        } else {
+            document.getElementById('container').innerHTML = '很遗憾，你的浏览器不支持WebGL'
+        }
+
+
+        function initThree() {
+            //场景
+            scene = new THREE.Scene();
+            //透视镜头：视角，宽高比，近裁剪面，远裁剪面
+            // https://www.techbrood.com/threejs/docs/#使用指南/入门介绍/创建一个场景(Scene)
+            camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
+            // 把镜头放置在中心点附近
+            camera.position.set(0, 0, 0.001);
+            //渲染器（抗锯齿）
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            addBox();
+            addBall();
+            addMusic();
+            addControls();
+
+            // 实现宽高自适应
+            window.addEventListener('resize', onWindowResize);
+            // 绑定点击事件，发射射线
+            document.addEventListener('click', onClick);
+            // 绑定触摸事件
+            window.addEventListener("touchstart", onTouchStart);
+        }
+
+
+        function addMusic() {
+            // create an AudioListener and add it to the camera
+            const listener = new THREE.AudioListener();
+            camera.add(listener);
+
+            // create a global audio source
+            sound = new THREE.Audio(listener);
+
+            // load a sound and set it as the Audio object's buffer
+            const audioLoader = new THREE.AudioLoader();
+            audioLoader.load('./sounds/qianqianwanwan.mp3', function (buffer) {
+                sound.setBuffer(buffer);
+                sound.setLoop(false);
+                sound.setVolume(0.5);
+            });
+        }
+
+        function addControls() {
+            //轨道控制器，可以使得相机围绕目标进行轨道运动。
+            // 重点：为了实现切换到手动旋转模式，这里必须初始化一下，否则第一次切换不好使
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            // controls.enableZoom = false // 禁止缩放
+            controls.autoRotate = true  // 自动旋转
+            controls.enableDamping = true  // 开启惯性
+        }
+
+        function addBall() {
+            const meshMaterial = new THREE.MeshPhongMaterial({ color: 0x156289, emissive: 0x072534, side: 'DoubleSide', flatShading: true });
+            ball = new THREE.Mesh(new THREE.IcosahedronGeometry(0.05, 0), meshMaterial)
+            ball.position.set(0.18, 0.2, -0.2)
+            scene.add(ball)
+            scene.add(new THREE.PointLight(0xffffff, 2))
+        }
+
+        function addBox() {
+            //添加3D几何体
+            var sphereGeometry = new THREE.SphereGeometry(/*半径*/1, /*垂直节点数量*/50, /*水平节点数量*/50);//节点数量越大，需要计算的三角形就越多，影响性能
+            sphereGeometry.scale(1, 1, -1);
+            var texture = new THREE.TextureLoader().load('./images/wilds.jpg');
+            var sphereMaterial = new THREE.MeshBasicMaterial({ map: texture });
+            var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            scene.add(sphere);
+        }
+
+        //帧同步重绘
+        // 这将创建一个循环，以每秒60次的频率来绘制场景。
+        function animate() {
+            requestAnimationFrame(animate);
+            ball.rotation.x += 0.005;
+            ball.rotation.y += 0.005;
+            controls.update()
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            // 更新相机的宽高比
+            camera.aspect = window.innerWidth / window.innerHeight;
+            // 更新透视相机的投影矩阵
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+
+        // 触摸开始的时候，停止自动旋转
+        function onTouchStart(e) {
+            controls.autoRotate = false
+        }
+
+        // 点击时，从镜头发射射线到点击的位置，如果碰到精灵贴图，就会有提示
+        function onClick(e) {
+            let raycaster = new THREE.Raycaster();
+            let mouse = new THREE.Vector2();
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            // 检测射线与哪些物体相交
+            let intersects = raycaster.intersectObjects([ball]);
+            // 如果与某个物体相交
+            if (intersects.length > 0) {
+                if (sound.isPlaying) {
+                    sound.pause()
+                } else {
+                    sound.play()
+                }
+            }
+        }
+
+    </script>
+</body>
+
+</html>

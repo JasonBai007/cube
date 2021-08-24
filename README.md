@@ -2,6 +2,7 @@
 a 360° Cube developed with three.js
 
 ![https://lubanseven.gitee.io/room](https://raw.githubusercontent.com/JasonBai007/3d-room/main/qr.png)
+![https://lubanseven.gitee.io/room/ufo.html](https://raw.githubusercontent.com/JasonBai007/3d-room/main/qr2.png)
 
 ## Features
 1. 支持开屏自动旋转

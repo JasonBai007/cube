@@ -1,9 +1,9 @@
 # 3d-Cube
 three 360° Cubes developed with three.js
 
-<img src="https://raw.githubusercontent.com/JasonBai007/3d-room/main/qr.png" width="200px" />
-<img src="https://raw.githubusercontent.com/JasonBai007/3d-room/main/qr2.png" width="200px" />
-<img src="https://raw.githubusercontent.com/JasonBai007/3d-room/main/qr3.png" width="200px" />
+<span><img src="https://raw.githubusercontent.com/JasonBai007/3d-room/main/qr.png" width="200px" /></span>
+<span><img src="https://raw.githubusercontent.com/JasonBai007/3d-room/main/qr2.png" width="200px" /></span>
+<span><img src="https://raw.githubusercontent.com/JasonBai007/3d-room/main/qr3.png" width="200px" /></span>
 
 ## Features
 1. 支持开屏自动旋转
